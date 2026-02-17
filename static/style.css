@@ -18,6 +18,7 @@ h1 {
     padding: 15px;
     border-radius: 8px;
     max-width: 600px;
+    margin-bottom: 20px;
 }
 
 button {
@@ -25,8 +26,146 @@ button {
     margin-right: 5px;
     padding: 8px 12px;
     cursor: pointer;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
 }
 
 .hidden {
     display: none;
 }
+
+/* CONTROLES DE DEBUG */
+.debug-controls {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    max-width: 600px;
+}
+
+.debug-controls p {
+    margin: 0 0 10px 0;
+    font-size: 12px;
+    color: #856404;
+}
+
+.btn-reset {
+    background: #ffc107;
+    color: #000;
+    padding: 6px 12px;
+    font-size: 12px;
+    border: 1px solid #ff9800;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-reset:hover {
+    background: #ff9800;
+    color: white;
+}
+
+
+/* MAPA DE MISSÕES */
+.missions-map {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-width: 600px;
+}
+
+.missions-map h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.missions-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mission-node {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid #ddd;
+}
+
+.mission-node.pending {
+    background: #e9ecef;
+    color: #666;
+}
+
+.mission-node.completed {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.mission-node.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+}
+
+.mission-node.locked {
+    background: #f8f9fa;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.mission-node:hover:not(.locked) {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mission-node-tooltip {
+    position: relative;
+}
+
+.mission-node-tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -50px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.mission-node-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
