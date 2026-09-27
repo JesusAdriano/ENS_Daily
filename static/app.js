@@ -20,7 +20,6 @@ const resetBtn = document.getElementById("resetBtn");
 let currentTextId = null;
 let currentMissionId = null;
 let allMissions = [];
-let nextAvailableMissionId = null;
 
 /* =====================
    CARREGAR MAPA DE MISSÕES
@@ -29,7 +28,6 @@ async function loadMissionsMap() {
     const response = await fetch(`${API_BASE}/missions`);
     const data = await response.json();
     allMissions = data.missions;
-    nextAvailableMissionId = null;
 
     missionsContainer.innerHTML = "";
 
@@ -43,17 +41,8 @@ async function loadMissionsMap() {
         if (mission.status === "completed") {
             statusClass = "completed";
             icon = "✓";
-            
-            // A próxima missão após uma completada fica disponível
-            if (index + 1 < allMissions.length && !nextAvailableMissionId) {
-                nextAvailableMissionId = allMissions[index + 1].id;
-            }
         } else if (mission.status === "pending") {
-            // Missão atual ou próxima disponível
             if (mission.id === currentMissionId) {
-                statusClass = "active";
-                icon = "→";
-            } else if (mission.id === nextAvailableMissionId) {
                 statusClass = "active";
                 icon = "→";
             } else {

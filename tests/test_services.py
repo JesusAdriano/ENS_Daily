@@ -73,8 +73,9 @@ def test_game_streak_logic():
     assert game.complete_daily_mission() is True
     assert game.streak == 1
 
-    # complete again same day should not increase
-    assert game.complete_daily_mission() is False
+    # completion advances to the next mission
+    assert game.get_daily_mission().reading_text.id == 1
+    assert game.complete_daily_mission() is True
     assert game.streak == 1
 
     # simulate yesterday completed -> streak increments

@@ -1,10 +1,17 @@
 {
-  "last_mission_day": "2026-03-23",
-  "streak": 0,
-  "last_completed_day": "2026-02-17",
+  "last_mission_day": "2026-09-27",
+  "streak": 1,
+  "last_completed_day": "2026-09-27",
+  "current_mission_index": 3,
+  "completed_mission_ids": [
+    1,
+    2,
+    3,
+    4
+  ],
   "daily_mission": {
     "status": "pending",
     "completed_date": null,
-    "text_id": 3
+    "text_id": 4
   }
 }

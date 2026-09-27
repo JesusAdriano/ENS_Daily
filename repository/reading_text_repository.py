@@ -1,7 +1,9 @@
 from domain.reading_text import ReadingText
+from repository.liturgy_repository import LiturgyRepository
 
 class ReadingTextRepository:
-    def __init__(self):
+    def __init__(self, liturgy_repository=None):
+        self.liturgy_repository = liturgy_repository or LiturgyRepository()
         self._texts = [
             ReadingText(
                 1,
@@ -25,14 +27,33 @@ class ReadingTextRepository:
             ),
         ]
 
-    def get_by_id(self, text_id: int) -> ReadingText | None:
+    def _get_local_by_id(self, text_id: int) -> ReadingText | None:
         for text in self._texts:
             if text.id == text_id:
                 return text
         return None
 
+    def get_by_id(self, text_id: int) -> ReadingText | None:
+        if text_id == 4:
+            liturgy = self.liturgy_repository.get_today()
+            if liturgy:
+                title = liturgy["titulo"]
+                if liturgy["referencia"]:
+                    title = f'{title} ({liturgy["referencia"]})'
+
+                content_parts = []
+                if liturgy["data"]:
+                    content_parts.append(f'Data: {liturgy["data"]}')
+                if liturgy["liturgia"]:
+                    content_parts.append(f'Liturgia: {liturgy["liturgia"]}')
+                content_parts.append(liturgy["texto"])
+                return ReadingText(4, title, "\n\n".join(content_parts))
+
+        return self._get_local_by_id(text_id)
+
     def get_all(self):
-        return self._texts
+        return [self.get_by_id(text.id) for text in self._texts]
 
     def get_by_index(self, index: int) -> ReadingText:
-        return self._texts[index % len(self._texts)]
+        text_id = self._texts[index % len(self._texts)].id
+        return self.get_by_id(text_id)

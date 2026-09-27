@@ -11,16 +11,14 @@ class Game:
         self.text_repository = text_repository
         self.daily_mission: Optional[DailyMission] = None
         self.last_mission_day: Optional[date] = None
+        self.current_mission_index: int = 0
+        self.completed_mission_ids: list[int] = []
 
-        # 🔥 STREAK
         self.streak: int = 0
         self.last_completed_day: Optional[date] = None
 
         if persisted_state:
             self._load_state(persisted_state)
-
-    def _get_today_index(self) -> int:
-        return date.today().timetuple().tm_yday
 
     def _load_state(self, state: Dict[str, Any]) -> None:
         if state.get("last_mission_day"):
@@ -28,40 +26,31 @@ class Game:
 
         self.streak = state.get("streak", 0)
         self.last_completed_day = deserialize_date(state.get("last_completed_day"))
+        self.completed_mission_ids = state.get("completed_mission_ids", [])
+
+        if "current_mission_index" in state:
+            self.current_mission_index = state["current_mission_index"]
 
         if state.get("daily_mission"):
             text_id = state["daily_mission"].get("text_id")
             text = self.text_repository.get_by_id(text_id)
 
             if text:
+                if "current_mission_index" not in state:
+                    self.current_mission_index = max(text.id - 1, 0)
                 self.daily_mission = DailyMission.from_persistence(
                     state["daily_mission"], text
                 )
 
-    def _reset_streak_if_needed(self) -> None:
-        if not self.last_completed_day:
-            return
-
-        today = date.today()
-        yesterday = today - timedelta(days=1)
-
-        if self.last_completed_day < yesterday:
-            self.streak = 0
-
     def get_daily_mission(self) -> DailyMission:
-        today = date.today()
-
-        self._reset_streak_if_needed()
-
-        if self.last_mission_day != today or self.daily_mission is None:
-            text_index = self._get_today_index()
-            reading_text: ReadingText = self.text_repository.get_by_index(text_index)
-
+        if self.daily_mission is None:
+            reading_text: ReadingText = self.text_repository.get_by_index(
+                self.current_mission_index
+            )
             self.daily_mission = DailyMission(reading_text)
-            self.last_mission_day = today
+            self.last_mission_day = date.today()
 
         assert self.daily_mission is not None
-        self.daily_mission.refresh_for_today()
         return self.daily_mission
 
     def complete_daily_mission(self) -> bool:
@@ -80,6 +69,16 @@ class Game:
 
         self.last_completed_day = today
         mission.complete()
+        mission_id = mission.reading_text.id
+        if mission_id not in self.completed_mission_ids:
+            self.completed_mission_ids.append(mission_id)
+
+        if hasattr(self.text_repository, "get_all"):
+            mission_count = len(self.text_repository.get_all())
+        else:
+            mission_count = len(self.text_repository._texts)
+        self.current_mission_index = (self.current_mission_index + 1) % mission_count
+        self.daily_mission = None
 
         return True
 
@@ -88,6 +87,8 @@ class Game:
             "last_mission_day": serialize_date(self.last_mission_day),
             "streak": self.streak,
             "last_completed_day": serialize_date(self.last_completed_day),
+            "current_mission_index": self.current_mission_index,
+            "completed_mission_ids": self.completed_mission_ids,
             "daily_mission": (
                 self.daily_mission.to_persistence() if self.daily_mission else None
             )
