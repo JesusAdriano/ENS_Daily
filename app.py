@@ -18,9 +18,11 @@ text_service = ReadingTextService(text_repository)
 def home():
     return render_template("index.html")
 
-@app.route('/static/service-worker.js')
+@app.route('/service-worker.js')
 def service_worker():
-    return send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
+    response = send_from_directory('static', 'service-worker.js', mimetype='application/javascript')
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
 
 @app.route('/static/manifest.json')
 def manifest():

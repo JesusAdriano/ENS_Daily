@@ -1,62 +1,66 @@
-// Service Worker para PWA
-const CACHE_NAME = 'ens-daily-v1';
-const urlsToCache = [
+const CACHE_NAME = 'ens-daily-v2';
+const APP_SHELL = [
   '/',
   '/static/app.js',
   '/static/style.css',
-  '/templates/index.html'
+  '/static/icons/icon-192.svg'
 ];
 
-// Install
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Fetch - Network first, fallback to cache
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') {
+  const requestUrl = new URL(event.request.url);
+
+  if (
+    event.request.method !== 'GET' ||
+    requestUrl.origin !== self.location.origin ||
+    requestUrl.pathname.startsWith('/api/') ||
+    !APP_SHELL.includes(requestUrl.pathname)
+  ) {
     return;
   }
 
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Cache successful responses
+    fetch(event.request).then(response => {
+      if (response.ok) {
         const clonedResponse = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, clonedResponse);
-        });
-        return response;
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clonedResponse));
+      }
+      return response;
+    }).catch(async () => {
+      const cachedResponse = await caches.match(event.request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      if (event.request.mode === 'navigate') {
+        return caches.match('/');
+      }
+
+      return new Response('Offline - Página não disponível', {
+        status: 503,
+        statusText: 'Service Unavailable'
       })
-      .catch(() => {
-        // Fallback to cache
-        return caches.match(event.request)
-          .then(response => {
-            return response || new Response('Offline - Página não disponível', {
-              status: 503,
-              statusText: 'Service Unavailable'
-            });
-          });
-      })
+    })
   );
 });
 
-// Activate
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName.startsWith('ens-daily-') && cacheName !== CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });

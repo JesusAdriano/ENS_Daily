@@ -11,9 +11,7 @@
     
     <title>Missão Diária</title>
     <link rel="manifest" href="/static/manifest.json">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23007bff' width='192' height='192'/><text x='50%' y='50%' font-size='120' fill='white' text-anchor='middle' dy='.3em'>📘</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%23007bff' width='180' height='180' rx='40'/><text x='90' y='90' font-size='100' fill='white' text-anchor='middle' dy='.35em'>📘</text></svg>">
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="icon" href="/static/icons/icon-192.svg" type="image/svg+xml">
 </head>
 <body>
 
@@ -57,7 +55,7 @@
     <!-- PWA - Registrar Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/static/service-worker.js')
+            navigator.serviceWorker.register('/service-worker.js')
                 .then(registration => {
                     console.log('Service Worker registrado:', registration);
                 })
